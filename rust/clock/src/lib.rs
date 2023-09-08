@@ -6,7 +6,7 @@ pub struct Clock{
 
 impl Clock {
     pub fn new(hours: i32, minutes: i32) -> Self {
-        //unimplemented!("Construct a new Clock from {hours} hours and {minutes} minutes");
+        
 
         //getting the total hours and minutes from minutes (Not Rolled Hours)
         let from_minutes = Clock::minutes_to_hours_and_minutes(minutes);
@@ -21,55 +21,78 @@ impl Clock {
     }
 
     pub fn add_minutes(&self, minutes: i32) -> Self {
-        unimplemented!("Add {minutes} minutes to existing Clock time");
+        
+        return Clock::new(self.hours, self.minutes + minutes);
+
     }
 
     //convertings possible large minutes to hours and minutes (hours not rolled)
     pub fn minutes_to_hours_and_minutes(minutes_supplied: i32) -> Clock {
 
-        if minutes_supplied < 60 {
-            return Clock {hours: 0, minutes: minutes_supplied};
+        let mut minutes_left= 0;
+        let mut hours_left= 0;
+
+        match minutes_supplied {
+            //if minutes dont need to roll
+            minutes_supplied if minutes_supplied < 60 && minutes_supplied >= 0 => {
+                minutes_left = minutes_supplied;
+                hours_left = 0;
+            },
+            minutes_supplied if minutes_supplied > 60 => { //if need to roll minutes
+                minutes_left = minutes_supplied % 60; //returns only the remaining minutes
+                hours_left = (minutes_supplied - minutes_left ) / 60;
+            },
+            minutes_supplied if minutes_supplied < 0 => { //if negative minutes
+                //minutes =  -5
+                hours_left = hours_left - (minutes_left.abs() / 60); //subtracts the amount of negative hours from hours left.
+                minutes_left = 60 - (minutes_supplied.abs() % 60);
+            },
+            _ => {
+                minutes_left = 0;
+                hours_left = 0;
+            }
         }
-
-
-        let minutes_left = minutes_supplied % 60; //returns only the remaining minutes
-        let hours_left:i32 = (minutes_supplied - &minutes_left ) / 60;
-    
-        let x = Clock { 
-            hours: hours_left, 
-            minutes: minutes_left 
-        };
-    
+        let x = Clock {hours: hours_left, minutes: minutes_left };
         return x;
     }
 
     //Final Time after all adjustments
-    pub fn set_time(hours: i32, minutes: i32) -> Clock{
-        //26 hours -> 26%24 = 2
-        let hours_corrected = {
-            //rolling time
-            if hours >= 24 {
-                //get remainder or time less than 24 hours
-                 let adjusted_hours = hours % 24;
-                 //adjusting to a 12 hour clock (like AM/PM) -> 13 hours =  1
-                 if adjusted_hours > 12 {
-                     adjusted_hours - 12
-                 }else{
-                     adjusted_hours
-                 }
-            }else{
-                 let adjusted_hours = hours;
-                 if adjusted_hours > 12 {
-                     adjusted_hours - 12
-                 }else{
-                     adjusted_hours
-                 }
-            }
-         };
+    pub fn set_time(hours: i32, minutes: i32) -> Clock {
 
-         let y = Clock{hours: hours_corrected, minutes};
+        let adjusted_hours;
+
+
+        match hours {
+            hours if hours >= 24 => { //rollings hours and correcting 12hr clock
+                adjusted_hours = Clock::correct_hours_to_12hr_clock(hours % 24);
+
+            },
+            hours if hours > 0 && hours < 24 => { //Correcting 12 hour clock
+                adjusted_hours = Clock::correct_hours_to_12hr_clock(hours);
+            },
+            hours if hours < 0 => {
+                adjusted_hours = Clock::correct_hours_to_12hr_clock(24 - (hours.abs() % 24));
+            },
+            _ => adjusted_hours = 0
+        }
+
+         let y = Clock{hours: adjusted_hours, minutes};
 
          y
+    }
+
+    pub fn correct_hours_to_12hr_clock(hours: i32) -> i32 {
+
+        match hours {
+            hours if hours > 12 => {
+                let hrs = hours - 12;
+                hrs
+            },
+            hours if hours <= 12 => {
+                hours
+            },
+            _ => hours,
+        }
     }
 }
 
