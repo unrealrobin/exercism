@@ -30,7 +30,7 @@ impl Clock {
     pub fn minutes_to_hours_and_minutes(minutes_supplied: i32) -> Clock {
 
         let mut minutes_left= 0;
-        let mut hours_left= 0;
+        let hours_left;
 
         match minutes_supplied {
             //if minutes dont need to roll
@@ -44,7 +44,7 @@ impl Clock {
             },
             minutes_supplied if minutes_supplied < 0 => { //if negative minutes
                 //minutes =  -5
-                hours_left = hours_left - (minutes_left.abs() / 60); //subtracts the amount of negative hours from hours left.
+                hours_left = minutes_left.abs() / 60; //subtracts the amount of negative hours from hours left.
                 minutes_left = 60 - (minutes_supplied.abs() % 60);
             },
             _ => {
