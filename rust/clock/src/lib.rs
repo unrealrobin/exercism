@@ -2,6 +2,7 @@
 pub struct Clock{
     hours: i32,
     minutes: i32,
+    //is_evening: bool,
 }
 
 impl Clock {
@@ -22,7 +23,18 @@ impl Clock {
 
     pub fn add_minutes(&self, minutes: i32) -> Self {
         
-        return Clock::new(self.hours, self.minutes + minutes);
+        //if minutes is negative?
+        match minutes {
+            minutes if minutes >=0 => {
+                Clock::new(self.hours, self.minutes + minutes)
+            },
+            minutes if minutes < 0 => {
+                Clock::new(self.hours, minutes + self.minutes)
+            },
+            _ => Clock::new(self.hours, self.minutes + minutes)
+        }
+
+        //Clock::new(self.hours, self.minutes + minutes)
 
     }
 
@@ -38,14 +50,44 @@ impl Clock {
                 minutes_left = minutes_supplied;
                 hours_left = 0;
             },
-            minutes_supplied if minutes_supplied > 60 => { //if need to roll minutes
+            minutes_supplied if minutes_supplied >= 60 => { //if need to roll minutes
                 minutes_left = minutes_supplied % 60; //returns only the remaining minutes
                 hours_left = (minutes_supplied - minutes_left ) / 60;
             },
             minutes_supplied if minutes_supplied < 0 => { //if negative minutes
                 //minutes =  -5
-                hours_left = minutes_left.abs() / 60; //subtracts the amount of negative hours from hours left.
-                minutes_left = 60 - (minutes_supplied.abs() % 60);
+                //minutes -67
+                match minutes_supplied {
+
+                   minutes_supplied if minutes_supplied.abs() <= 60 => {
+                    //(minutes_supplied.abs() / 60) * -1
+                    hours_left = -1;
+                    if minutes_supplied.abs() != 60 {
+                        minutes_left = 60 - (minutes_supplied.abs() % 60)
+                    };
+                   } ,
+
+                   minutes_supplied if minutes_supplied.abs() > 60 => {
+
+                    //gettings hours rolled before checking minutes
+                    let mut rolled_hours = (minutes_supplied.abs() / 60) * -1;
+
+                    //adjusting for extra minutes not rolling the hour once more. Like -67 should roll the hours twice.
+                    if minutes_supplied.abs() % 60 > 0 { 
+                     rolled_hours -= 1;
+                     minutes_left = 60 - (minutes_supplied.abs() % 60);
+                    };
+
+                    hours_left = rolled_hours;
+                   },
+                   _ => {
+                    minutes_left = minutes_supplied;
+                    hours_left = 0;
+                    }
+                } ; 
+
+
+                
             },
             _ => {
                 minutes_left = 0;
@@ -59,19 +101,21 @@ impl Clock {
     //Final Time after all adjustments
     pub fn set_time(hours: i32, minutes: i32) -> Clock {
 
-        let adjusted_hours;
+        let mut adjusted_hours;
 
 
         match hours {
-            hours if hours >= 24 => { //rollings hours and correcting 12hr clock
-                adjusted_hours = Clock::correct_hours_to_12hr_clock(hours % 24);
+            hours if hours >= 24 => { //rollings hours 
+                adjusted_hours = hours % 24;
 
             },
-            hours if hours > 0 && hours < 24 => { //Correcting 12 hour clock
-                adjusted_hours = Clock::correct_hours_to_12hr_clock(hours);
+            hours if hours > 0 && hours < 24 => { 
+                adjusted_hours = hours;
             },
             hours if hours < 0 => {
-                adjusted_hours = Clock::correct_hours_to_12hr_clock(24 - (hours.abs() % 24));
+                adjusted_hours = 24 - (hours.abs() % 24);
+                if adjusted_hours == 24 {
+                    adjusted_hours = 0;                }
             },
             _ => adjusted_hours = 0
         }
@@ -81,24 +125,26 @@ impl Clock {
          y
     }
 
-    pub fn correct_hours_to_12hr_clock(hours: i32) -> i32 {
+    // pub fn correct_hours_to_12hr_clock(hours: i32) -> i32 {
 
-        match hours {
-            hours if hours > 12 => {
-                let hrs = hours - 12;
-                hrs
-            },
-            hours if hours <= 12 => {
-                hours
-            },
-            _ => hours,
-        }
-    }
+    //     match hours {
+    //         hours if hours > 12 => {
+    //             let hrs = hours - 12;
+    //             hrs
+    //         },
+    //         hours if hours <= 12 => {
+    //             hours
+    //         },
+    //         _ => hours,
+    //     }
+    // }
 }
 
 impl ToString for Clock {
 
     fn to_string(&self) -> String {
+
+        // let hours_adjusted = Clock::correct_hours_to_12hr_clock(self.hours);
 
         //do check strings to add the 0 before if digit is less than 10
         let formatted_hours = {
