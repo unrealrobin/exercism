@@ -11,11 +11,23 @@ pub fn find(array: &[i32], key: i32) -> Option<usize> {
     Continue until key is found
     return as an option the index of the found key element match */
 
-    //let length_of_array = array.len();
-    let start = 0;
-    let end = array.len() - 1;
-    let index: Option<usize> = recurse(array, key, start, end);
-    index
+    // if array is empty then None
+    if array.len() == 0 {
+        return None;
+    } 
+
+    match key {
+        key if key == array[0] => {
+            return Some(0)
+        },
+        key if key == array[array.len() - 1] => {
+            return Some(array.len() - 1)
+        },
+        _ => recurse(array, key, 0, array.len() - 1)
+    }
+
+    // recurse(array, key, 0, array.len() - 1)
+  
     
 }
 
@@ -23,10 +35,20 @@ pub fn recurse (array: &[i32], key: i32, start: usize, end:usize) -> Option<usiz
 
     let index;
     let mid = start + (end - start) / 2;
+    let value_at_mid = array[mid];
 
-    if key == array[mid]{
-        index = Some(mid);
-        return index;
+    //Base Case
+    if key == value_at_mid{
+        return Some(mid);
+    }
+
+    //Checks for Crossing of bounds
+    if  start == mid || mid == end || start == end {
+        if key == array[mid]{
+            return Some(mid);
+        }else{
+            return None;
+        }
     }
 
     match key {
@@ -37,7 +59,7 @@ pub fn recurse (array: &[i32], key: i32, start: usize, end:usize) -> Option<usiz
           
         },
         key if key > array[mid] => {
-            index = recurse(array, key, mid, end);
+            index = recurse(array, key, mid + 1, end);
             return index;
         },
         _ => None,
