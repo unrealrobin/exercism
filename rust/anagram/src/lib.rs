@@ -1,5 +1,14 @@
 use std::collections::HashSet;
 
 pub fn anagrams_for<'a>(word: &str, possible_anagrams: &[&str]) -> HashSet<&'a str> {
-    todo!("For the '{word}' word find anagrams among the following words: {possible_anagrams:?}");
+    
+    let mut letters = HashSet::new();
+
+    for each_letter in word {
+        letters.insert(each_letter);
+    }
+    
+    println!("{:?}", letters);
+
+    letters
 }
